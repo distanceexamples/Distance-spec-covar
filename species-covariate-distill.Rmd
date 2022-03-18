@@ -50,8 +50,7 @@ convunit <- convert_units("meter", "kilometer", "hectare")
 
 # Detections by species
 
-
-In Buckland's [-@Buckland2006] line transect survey, three of the four songbird species (c-chaffinch, g-great tit, r-robin, w-winter wren) were detected in sufficient quantities that sample size is not an issue.  However, the great tit was only detected 32 times, making the support for this species questionable.
+In Buckland's [-@Buckland2006] line transect survey, three of the four songbird species (c-chaffinch, g-great tit, r-robin, w-winter wren) were detected in sufficient quantities that sample size is not an issue.  However, the great tit was only detected 32 times, making the support for this species open to question.
 
 ```{r numdetects, echo=FALSE}
 knitr::kable(table(birds$species),
@@ -68,7 +67,7 @@ Inclusion of `species` as a covariate in the detection function is simple using 
 
 ```{r detfn}
 all.birds <- ds(data = birds,
-                key="hn", convert.units = convunit,
+                key="hn", convert_units = convunit,
                 formula=~species, truncation = 95)
 ```
 
@@ -84,37 +83,18 @@ The CvM goodness of fit test indicates this model adequately fits the data, W=`r
 
 The shape of the species-specific detection functions can be seen by using the plotting function provided below.
 
-```{r plotcode, out.width="80%", fig.retina=4, fig.cap="Species-specific detection functions.  Base (intercept) species is chaffinch." }
-plot.with.covariates <- function(dsobject) {
-  #   Purpose: plot detection function for each level of factor covariate
-  #   Input:   object of class ds produced by ds()
-  #   Output:  plot
-  #   Author:  Rexstad, February 2020
-  #   Notes:   makes use of function detfct() to do the work.
-  myobject <- dsobject$ddf$ds$aux$ddfobj
-  truncation <- dsobject$ddf$meta.data$width
-  mycovariate <- myobject$xmat[,2]  # position in matrix when only a single covariate
-  covar.levels <- length(unique(mycovariate))
-  dists <- seq(0, truncation)
-  xx <- matrix(data=NA, nrow=length(dists), ncol = covar.levels)
-  this.dist <- 0
-  for (i in dists) {
-    this.dist <- this.dist + 1
-    xx[this.dist, ] <- unique(detfct(i, myobject))
-  }
-  
-  plot(dists, xx[,1], type='l', lty=1, ylim=c(0,1),
-       xlab="Distance (m)", ylab="Detection probability", 
-       main="Detection function for levels of factor covariate")
-  for (more.levels in 2:covar.levels) {
-    lines(dists, xx[,more.levels], type="l", lty=more.levels)
-  }
-  legend("topright", legend=attr(myobject$scale$dm, "dimnames")[[2]],
-         lty=seq(1:covar.levels), cex=0.75,
-         title="Covariate value")
-}
-
-plot.with.covariates(all.birds)
+```{r plotcode, out.width="80%", fig.retina=4, fig.cap="Species-specific detection functions." }
+plot(all.birds, showpoints=FALSE, main="Montrave line transects\nspecies as covariate")
+add.df.covar.line(all.birds, data=data.frame(species="c"), 
+                  lwd=3, lty=1, col="blue")
+add.df.covar.line(all.birds, data=data.frame(species="g"), 
+                  lwd=3, lty=1, col="darkgreen")
+add.df.covar.line(all.birds, data=data.frame(species="r"), 
+                  lwd=3, lty=1, col="brown")
+add.df.covar.line(all.birds, data=data.frame(species="w"), 
+                  lwd=3, lty=1, col="salmon")
+legend("topright", legend=c("chaffinch", "great tit", "robin", "winter wren"),
+       lwd=3, lty=1, col=c("blue", "darkgreen", "brown", "salmon"))
 ```
 
 # Species-specific density estimates 
@@ -163,10 +143,10 @@ chafgt[last.row, "visit"] <- NA
 robwren <- birds[birds$species %in% c("r","w"), ] 
 robwren <- droplevels(robwren)
 hn.birds <- ds(data = chafgt,
-               key="hn", convert.units = convunit,
+               key="hn", convert_units = convunit,
                formula=~species, truncation = 95)
 hr.birds <- ds(data = robwren,
-               key="hr", convert.units = convunit,
+               key="hr", convert_units = convunit,
                formula=~species, truncation = 95)
 
 gof.cg <- gof_ds(hn.birds, plot=FALSE)$dsgof$CvM
