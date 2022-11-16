@@ -36,6 +36,9 @@ The data are available online at a website that serves as a companion to Bucklan
 
 ```{r readdata}
 birds <- read.csv("https://synergy.st-andrews.ac.uk/ds-manda/files/2016/11/montrave-line.csv")
+# Add object column (required for dht2)
+birds$object <- NA
+birds$object[!is.na(birds$distance)] <- 1:sum(!is.na(birds$distance))
 ```
 
 # Data preparation
